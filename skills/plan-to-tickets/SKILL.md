@@ -1,7 +1,6 @@
 ---
 name: plan-to-tickets
-description: Turn an idea into an approved design, a separately approved plan and ticket breakdown, then published implementation tickets.
-disable-model-invocation: true
+description: Coordinate design, approved plans, and implementation tickets when the user requests a planning-to-ticket workflow or a domain skill delegates that workflow here.
 ---
 
 # Plan to tickets
@@ -10,6 +9,11 @@ Default to design and ticket publication, not implementation. Resume from the
 last approved checkpoint: inspect existing plans, issues, branches, and worktrees
 before creating duplicates. Apply repository and harness instructions first;
 this skill grants no permissions that they withhold.
+
+Domain skills may load this coordinator through the harness's skill mechanism.
+Use their domain requirements within this workflow and resume the current
+checkpoint if already active. Automatic loading preserves every approval gate
+and does not authorize ticket publication, implementation, or dispatch.
 
 ## Dependency preflight — before starting or resuming
 
