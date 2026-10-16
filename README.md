@@ -33,9 +33,14 @@ dependencies required by the installed upstream versions available as well.
 
 ## Use
 
-Explicitly invoke `plan-to-tickets` in your agent, for example:
+Invoke `plan-to-tickets` directly in your agent, for example:
 
 > Use plan-to-tickets to design this feature and publish implementation tickets.
+
+A domain skill may also load `plan-to-tickets` automatically through the harness's
+skill mechanism. Automatic loading keeps the same approval gates; it does not
+authorize ticket publication, implementation, or dispatch. User-only upstream
+skills still require explicit invocation when prompted.
 
 The skill establishes context, grills the design, saves a plan for approval,
 gets separate approval of the ticket breakdown, publishes tickets, then **stops**.
