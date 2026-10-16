@@ -45,9 +45,13 @@ preflight stops on missing skills or blocked loading. User-invoked skills need
 explicit user invocation: invoke `to-tickets` when prompted, and
 `setup-matt-pocock-skills` if repository configuration is missing.
 
-The parent stays in its starting workspace. Small-ticket delegation uses nested
-children; a separate worker session is permitted only for an authorized
-file-changing workspace boundary, subject to user permission and harness rules.
+Before task work, the parent reuses a suitable dedicated same-task worktree or
+establishes one and moves there once, subject to checkout safety and harness
+rules. It stays anchored there through ticket execution. Same-repository tickets
+use native nested children, including in isolated ticket worktrees where supported;
+capability blockers must be reported. Separate top-level workers are permitted
+only for work spanning multiple repositories/projects, with the required user
+authorization, not merely for another worktree in the same repository.
 See the authoritative [session and workspace policy](skills/plan-to-tickets/SKILL.md#session-and-workspace-policy)
 for the full rules.
 
