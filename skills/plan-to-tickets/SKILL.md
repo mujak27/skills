@@ -92,6 +92,31 @@ the workflow, including optional implementation.
   not permission to create a top-level worker or relocate the parent. Arrange
   results back to the parent when supported, and record worker IDs, branches,
   and paths for the user.
+- **Track cross-repository results.** Before an authorized cross-repository
+  dispatch, verify automatic result delivery and destination-scoped inspection
+  capabilities. With OpenChamber, set `returnResult: true` on `session.create`
+  with a prompt, or on each `session.send` that dispatches work to an existing
+  worker. Scope the dispatch to the destination using `projectId` or `directory`
+  (not both). This requests the worker's final answer back in the parent session
+  when it finishes; the parent remains anchored in repository A while the worker
+  runs in repository B. For native children or other harnesses, use only verified
+  supported result-return mechanisms, not invented equivalents.
+  After dispatch confirmation, include the assignment, destination project and
+  absolute directory/worktree, returned session ID, and result-delivery status in
+  a parent progress update. Retain these identifiers for later updates and handoff;
+  resolve the actual worker path if dispatch created a worktree.
+  On demand, use OpenChamber `session.status` with that `sessionId` and destination
+  `projectId` or `directory`, not the parent's default scope. Use `session.messages`
+  with the same scope for detail (`lastAssistant: true` for the final answer).
+  Reading status/messages does not dispatch work; `session.send` starts a new
+  prompt and is not a progress query. Report observed status and blockers without
+  treating completion as proof of acceptance or integration.
+  Automatic final-answer delivery is a completion notification, not live progress.
+  Do not promise persistent UI badges or automatic live updates. If delivery,
+  destination resolution, status, or message inspection is unavailable, report the
+  exact capability blocker and agree a supported handoff/inspection path before
+  relying on dispatch. Keep the parent anchored and the same-repository boundary
+  intact; missing capabilities grant no additional dispatch permissions.
 - **Base deliberately.** Resolve the original checkout from Git common/worktree
   metadata; use its sibling `<repo>-worktrees/<filesystem-safe-slug>`, never a
   nested or singular `-worktree` container. Inspect the configured default remote

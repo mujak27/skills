@@ -52,6 +52,11 @@ use native nested children, including in isolated ticket worktrees where support
 capability blockers must be reported. Separate top-level workers are permitted
 only for work spanning multiple repositories/projects, with the required user
 authorization, not merely for another worktree in the same repository.
+Cross-repository dispatches request automatic final-answer delivery where
+supported (`returnResult: true` in OpenChamber) and record the destination and
+session ID in parent progress updates for on-demand status/message inspection.
+Completion notifications are not live progress or persistent UI badges;
+unsupported capabilities must be reported.
 See the authoritative [session and workspace policy](skills/plan-to-tickets/SKILL.md#session-and-workspace-policy)
 for the full rules.
 
