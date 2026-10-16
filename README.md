@@ -6,7 +6,13 @@ package scaffolding.
 
 ## Install
 
+Install [Matt Pocock’s skills](https://github.com/mattpocock/skills) first, then
+this scaffold. The skills installer does **not** resolve dependencies automatically.
+
 ```sh
+# Install upstream skills, including their companion skills and reference files
+npx skills add mattpocock/skills
+
 # Inspect available skills without installing
 npx skills add mujak27/skills --list
 
@@ -17,6 +23,14 @@ npx skills add mujak27/skills --skill plan-to-tickets
 npx skills add mujak27/skills --skill plan-to-tickets --global
 ```
 
+Install both repositories into the same agent scope; for global use, add
+`--global` to the upstream command too. Select at least `grilling`,
+`domain-modeling`, `to-tickets`, `tdd`, `code-review`, `codebase-design`, and
+`setup-matt-pocock-skills` from upstream. The first five are hard dependencies,
+even when implementation is not requested. The latter two support upstream's
+conditional interface-design and repository-setup requirements. Keep any further
+dependencies required by the installed upstream versions available as well.
+
 ## Use
 
 Explicitly invoke `plan-to-tickets` in your agent, for example:
@@ -25,8 +39,11 @@ Explicitly invoke `plan-to-tickets` in your agent, for example:
 
 The skill establishes context, grills the design, saves a plan for approval,
 gets separate approval of the ticket breakdown, publishes tickets, then **stops**.
-Implementation or agent dispatch requires an explicit request. Optional companion
-skills improve individual stages; inline fallbacks keep the workflow standalone.
+Implementation or agent dispatch requires an explicit request. This scaffold
+requires the upstream skills; it does not replace their workflows. Dependency
+preflight stops on missing skills or blocked loading. User-invoked skills need
+explicit user invocation: invoke `to-tickets` when prompted, and
+`setup-matt-pocock-skills` if repository configuration is missing.
 
 The parent stays in its starting workspace. Small-ticket delegation uses nested
 children; a separate worker session is permitted only for an authorized
@@ -42,5 +59,4 @@ missing capabilities must be reported rather than simulated.
 
 Credit to [Matt Pocock’s agent skills](https://github.com/mattpocock/skills) for
 the underlying workflows. `plan-to-tickets` adds scaffolding to coordinate those
-skills around my usual planning, approval, and delegation process, with inline
-fallbacks when companion skills are unavailable.
+skills around my usual planning, approval, and delegation process.
