@@ -1,6 +1,8 @@
 # Skills
 
-Reusable agent instructions, without runtime dependencies or package scaffolding.
+Lightweight workflow scaffolding tailored to my usual development workflow.
+This repository contains instructions only, with no runtime dependencies or
+package scaffolding.
 
 ## Install
 
@@ -38,6 +40,7 @@ missing capabilities must be reported rather than simulated.
 
 ## Attribution
 
-`plan-to-tickets` adapts the Crossplane-specific workflow introduced in
-[crossplane-compilations PR #18](https://github.com/mujak27/crossplane-compilations/pull/18)
-into a domain-independent skill.
+Credit to [Matt Pocock’s agent skills](https://github.com/mattpocock/skills) for
+the underlying workflows. `plan-to-tickets` adds scaffolding to coordinate those
+skills around my usual planning, approval, and delegation process, with inline
+fallbacks when companion skills are unavailable.
