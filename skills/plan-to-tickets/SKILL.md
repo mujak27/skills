@@ -50,36 +50,48 @@ installed and verified, and applicable invocation/capability blockers are resolv
 This section is authoritative for session placement and delegation throughout
 the workflow, including optional implementation.
 
-- **Anchor the parent.** Keep the coordinating session in its starting
-  directory/project/worktree. Never relocate it with `session_move`,
-  `session.moveToWorktree`, or equivalent tooling. Ordinary files or folders
-  within the same workspace do not justify a new session.
-- **Nest small work.** Use native nested child subagents that return to the
-  current parent for smaller tickets. Prefer a child that can be scoped to the
-  exact target worktree. A top-level `session.create` is not a nested subagent.
-- **Cross only actual workspace boundaries.** A separate top-level worker is
-  permitted only when authorized file-changing work needs a different
-  repository/project directory or an isolated worktree. Task size, a different
-  folder, read-only investigation, preferred model, or concurrency alone is not
-  a reason. This is permission, not automatic dispatch: honor explicit user
-  requests and all higher-priority restrictions. If the harness requires an
-  explicit user request for a top-level session, ask for it first.
-- **Keep workers bounded.** At a necessary boundary, use a scoped nested child
-  if supported; otherwise use supported worker-session tooling with the required
-  authorization, leaving the parent anchored. A worker may use nested children
-  for its smaller tickets. Once at its assigned workspace, it reuses that
-  workspace for the same task; it must not recursively spawn replacement
-  sessions/worktrees for its own assignment. Report unavailable capabilities
-  and ask for a supported handoff rather than moving the parent or pretending
-  independent sessions are nested. Arrange results back to the parent when
-  supported, and record worker session IDs, branches, and paths for the user.
-- **Prepare before editing.** Read-only investigation and design need no
-  worktree. Before the first repository edit (including docs), assign a safe
-  task worktree and a writer under the rules above. Reuse an existing same-task
-  worktree only after inspecting its branch and changes. Preserve unfamiliar
-  work. With dirty or open-PR starting checkouts, ask before isolating where
-  required by the harness; offer an authorized worker/worktree, not relocation
-  of the parent. An explicit user request cannot override safety constraints.
+- **Place once, then anchor.** Before starting task work, inspect the parent’s
+  current directory, Git state, and existing worktrees. Read-only discovery and
+  dependency preflight may precede placement. If already in a suitable dedicated
+  same-task worktree, reuse it without moving. Otherwise inspect and reuse a
+  suitable existing same-task worktree, or create one under the rules below, then
+  move the coordinating parent into it once with supported session tooling.
+  Verify suitability from task ownership, branch, prerequisites, and current
+  changes; a matching directory name alone is insufficient.
+  Verify and record the task path and branch before proceeding, including before
+  any repository edit (code, tests, configuration, or docs). Keep the parent
+  anchored there for the rest of the task, including ticket execution; ticket
+  worktrees and other repositories are worker destinations, not parent moves.
+- **Preserve starting work.** Inspect branch changes and open PRs before initial
+  placement. For unfamiliar uncommitted changes or an open-PR starting checkout,
+  offer to move this session into a new task worktree and wait for approval where
+  required by the harness. An explicit worktree request permits proceeding
+  without asking again, subject to all remaining safety constraints. Inspect
+  whether move tooling carries changes; preserve unfamiliar work without
+  discarding, overwriting, or silently carrying it into this task. Report unsafe
+  or unsupported placement as a blocker rather than editing in the wrong checkout.
+- **Nest same-repository work.** Use native nested child subagents that return
+  to the anchored parent for same-repository tickets, including tickets assigned
+  isolated worktrees. Verify that the harness supports scoping each child to its
+  exact assigned worktree. A top-level `session.create` is not a nested subagent;
+  an isolated same-repository worktree does not justify a top-level session.
+- **Cross only repository/project boundaries.** A separate top-level worker is
+  permitted only when the task actually spans multiple repositories/projects and
+  authorized file-changing work needs that other repository/project. A different
+  folder or worktree in the same repository, task size, read-only investigation,
+  preferred model, or concurrency alone is not a reason. Prefer a scoped nested
+  child across repositories too, if supported. Top-level dispatch still requires
+  all user authorization and harness permissions; ask for an explicit user request
+  first when required. This is permission, not automatic dispatch.
+- **Keep workers bounded.** Give each worker an exact workspace and assignment
+  while leaving the parent anchored. Once placed, a worker reuses that workspace
+  for its assignment; it must not recursively spawn replacement sessions/worktrees
+  for that assignment. It may use native nested children within its assigned scope.
+  Report unavailable nesting, worktree scoping, or other capabilities and ask for
+  a supported handoff or execution path. A same-repository capability blocker is
+  not permission to create a top-level worker or relocate the parent. Arrange
+  results back to the parent when supported, and record worker IDs, branches,
+  and paths for the user.
 - **Base deliberately.** Resolve the original checkout from Git common/worktree
   metadata; use its sibling `<repo>-worktrees/<filesystem-safe-slug>`, never a
   nested or singular `-worktree` container. Inspect the configured default remote
@@ -104,7 +116,8 @@ When an issue or change becomes part of the work, link it immediately with
 resolved later. Otherwise retain its URL in the handoff. Never claim a tool
 action succeeded without confirmation.
 
-**Done:** the relevant context and unresolved design questions are identified.
+**Done:** the parent is placed and anchored under the session policy, and the
+relevant context and unresolved design questions are identified.
 
 ## 2. Grill the design
 
@@ -176,15 +189,19 @@ their links; otherwise report the precise blocked state.
 
 ## 6. Implement only on explicit request
 
-Apply the session and workspace policy before assigning any writer. Claim tickets
-according to tracker conventions and dispatch only those with verified completed
-blockers. When dispatch is not authorized or supported, agree a safe manual
-execution path rather than inventing agent capabilities.
+Retain the parent's established task worktree; resuming implementation is not a
+new placement step. Apply the session and workspace policy before assigning any
+writer. Claim tickets according to tracker conventions and dispatch only those
+with verified completed blockers. When dispatch is not authorized or supported,
+report the blocker and agree a safe manual execution path that keeps the parent
+anchored rather than inventing agent capabilities.
 
 - Use one writer at a time in a shared task worktree. Parallel file-changing
   tickets require separate isolated ticket worktrees, even for different files;
-  parallelize only independent work. Integrate returned commits serially into
-  the task branch and rerun relevant combined checks before unblocking dependents.
+  parallelize only independent work using supported, worktree-scoped native
+  children for same-repository tickets. Worktree isolation does not authorize
+  top-level sessions. Integrate returned commits serially into the anchored
+  task branch and rerun relevant combined checks before unblocking dependents.
 - Supply each writer with the ticket body/comments, approved decisions, exact
   worktree and branch, prerequisite commits, scope, and acceptance checks.
   Require commits, actual validation results, and unresolved blockers in return.
