@@ -18,9 +18,11 @@ npx skills add mujak27/skills --list
 
 # Install into the current project
 npx skills add mujak27/skills --skill plan-to-tickets
+npx skills add mujak27/skills --skill agent-dispatch
 
 # Optional: install globally instead
 npx skills add mujak27/skills --skill plan-to-tickets --global
+npx skills add mujak27/skills --skill agent-dispatch --global
 ```
 
 Install both repositories into the same agent scope; for global use, add
@@ -32,6 +34,8 @@ conditional interface-design and repository-setup requirements. Keep any further
 dependencies required by the installed upstream versions available as well.
 
 ## Use
+
+### Plan to tickets
 
 Invoke `plan-to-tickets` directly in your agent, for example:
 
@@ -50,20 +54,27 @@ preflight stops on missing skills or blocked loading. User-invoked skills need
 explicit user invocation: invoke `to-tickets` when prompted, and
 `setup-matt-pocock-skills` if repository configuration is missing.
 
-Before task work, the parent reuses a suitable dedicated same-task worktree or
-establishes one and moves there once, subject to checkout safety and harness
-rules. It stays anchored there through ticket execution. Same-repository tickets
-use native nested children, including in isolated ticket worktrees where supported;
-capability blockers must be reported. Separate top-level workers are permitted
-only for work spanning multiple repositories/projects, with the required user
-authorization, not merely for another worktree in the same repository.
-Cross-repository dispatches request automatic final-answer delivery where
-supported (`returnResult: true` in OpenChamber) and record the destination and
-session ID in parent progress updates for on-demand status/message inspection.
-Completion notifications are not live progress or persistent UI badges;
-unsupported capabilities must be reported.
-See the authoritative [session and workspace policy](skills/plan-to-tickets/SKILL.md#session-and-workspace-policy)
-for the full rules.
+`plan-to-tickets` also requires the companion `agent-dispatch` from this repository,
+including for planning-only workspace placement. Install both into the same scope.
+The upstream dependencies above belong to `plan-to-tickets`; `agent-dispatch`
+can be installed and used independently without them.
+
+### Agent dispatch
+
+> Use agent-dispatch to coordinate these authorized workers and their follow-ups.
+
+This shared skill owns parent anchoring, workspace isolation, nested children
+versus authorized cross-repository sessions, result delivery, and worker context
+rollover. It can be loaded directly or by another skill; loading it does not
+authorize dispatch. See its authoritative
+[session and workspace policy](skills/agent-dispatch/SKILL.md#session-and-workspace-policy).
+
+When current worker context reaches **70% of the model's context window or
+250,000 tokens, whichever comes first**, the parent requests a compact handoff,
+waits for the worker to stop editing, and starts a fresh equivalent worker in the
+same workspace. The old worker is retired, or closed/archived only if supported.
+Unavailable usage metrics require disclosure and checkpoint-based rollover,
+not invented token counts. See the [rollover procedure](skills/agent-dispatch/SKILL.md#context-rollover).
 
 These are skill instructions, not enforced sandboxing. Session, subagent, Project
 knowledge, and issue-tracker integrations require support from the agent harness;
