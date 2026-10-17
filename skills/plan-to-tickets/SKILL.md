@@ -51,85 +51,15 @@ installed and verified, and applicable invocation/capability blockers are resolv
 
 ## Session and workspace policy
 
-This section is authoritative for session placement and delegation throughout
-the workflow, including optional implementation.
+Require the companion `agent-dispatch` skill from this repository. Verify it is
+installed and load it through the supported skill mechanism before task placement
+or repository edits, including planning-only work. It is authoritative for parent
+anchoring, workspace placement, worker dispatch, result delivery, and context
+rollover throughout this workflow. If missing or blocked, stop and request its
+installation or permitted invocation; do not substitute an inline copy.
 
-- **Place once, then anchor.** Before starting task work, inspect the parent’s
-  current directory, Git state, and existing worktrees. Read-only discovery and
-  dependency preflight may precede placement. If already in a suitable dedicated
-  same-task worktree, reuse it without moving. Otherwise inspect and reuse a
-  suitable existing same-task worktree, or create one under the rules below, then
-  move the coordinating parent into it once with supported session tooling.
-  Verify suitability from task ownership, branch, prerequisites, and current
-  changes; a matching directory name alone is insufficient.
-  Verify and record the task path and branch before proceeding, including before
-  any repository edit (code, tests, configuration, or docs). Keep the parent
-  anchored there for the rest of the task, including ticket execution; ticket
-  worktrees and other repositories are worker destinations, not parent moves.
-- **Preserve starting work.** Inspect branch changes and open PRs before initial
-  placement. For unfamiliar uncommitted changes or an open-PR starting checkout,
-  offer to move this session into a new task worktree and wait for approval where
-  required by the harness. An explicit worktree request permits proceeding
-  without asking again, subject to all remaining safety constraints. Inspect
-  whether move tooling carries changes; preserve unfamiliar work without
-  discarding, overwriting, or silently carrying it into this task. Report unsafe
-  or unsupported placement as a blocker rather than editing in the wrong checkout.
-- **Nest same-repository work.** Use native nested child subagents that return
-  to the anchored parent for same-repository tickets, including tickets assigned
-  isolated worktrees. Verify that the harness supports scoping each child to its
-  exact assigned worktree. A top-level `session.create` is not a nested subagent;
-  an isolated same-repository worktree does not justify a top-level session.
-- **Cross only repository/project boundaries.** A separate top-level worker is
-  permitted only when the task actually spans multiple repositories/projects and
-  authorized file-changing work needs that other repository/project. A different
-  folder or worktree in the same repository, task size, read-only investigation,
-  preferred model, or concurrency alone is not a reason. Prefer a scoped nested
-  child across repositories too, if supported. Top-level dispatch still requires
-  all user authorization and harness permissions; ask for an explicit user request
-  first when required. This is permission, not automatic dispatch.
-- **Keep workers bounded.** Give each worker an exact workspace and assignment
-  while leaving the parent anchored. Once placed, a worker reuses that workspace
-  for its assignment; it must not recursively spawn replacement sessions/worktrees
-  for that assignment. It may use native nested children within its assigned scope.
-  Report unavailable nesting, worktree scoping, or other capabilities and ask for
-  a supported handoff or execution path. A same-repository capability blocker is
-  not permission to create a top-level worker or relocate the parent. Arrange
-  results back to the parent when supported, and record worker IDs, branches,
-  and paths for the user.
-- **Track cross-repository results.** Before an authorized cross-repository
-  dispatch, verify automatic result delivery and destination-scoped inspection
-  capabilities. With OpenChamber, set `returnResult: true` on `session.create`
-  with a prompt, or on each `session.send` that dispatches work to an existing
-  worker. Scope the dispatch to the destination using `projectId` or `directory`
-  (not both). This requests the worker's final answer back in the parent session
-  when it finishes; the parent remains anchored in repository A while the worker
-  runs in repository B. For native children or other harnesses, use only verified
-  supported result-return mechanisms, not invented equivalents.
-  After dispatch confirmation, include the assignment, destination project and
-  absolute directory/worktree, returned session ID, and result-delivery status in
-  a parent progress update. Retain these identifiers for later updates and handoff;
-  resolve the actual worker path if dispatch created a worktree.
-  On demand, use OpenChamber `session.status` with that `sessionId` and destination
-  `projectId` or `directory`, not the parent's default scope. Use `session.messages`
-  with the same scope for detail (`lastAssistant: true` for the final answer).
-  Reading status/messages does not dispatch work; `session.send` starts a new
-  prompt and is not a progress query. Report observed status and blockers without
-  treating completion as proof of acceptance or integration.
-  Automatic final-answer delivery is a completion notification, not live progress.
-  Do not promise persistent UI badges or automatic live updates. If delivery,
-  destination resolution, status, or message inspection is unavailable, report the
-  exact capability blocker and agree a supported handoff/inspection path before
-  relying on dispatch. Keep the parent anchored and the same-repository boundary
-  intact; missing capabilities grant no additional dispatch permissions.
-- **Base deliberately.** Resolve the original checkout from Git common/worktree
-  metadata; use its sibling `<repo>-worktrees/<filesystem-safe-slug>`, never a
-  nested or singular `-worktree` container. Inspect the configured default remote
-  and branch instead of assuming `origin/main`. Before creating each new task or
-  ticket worktree, fetch that remote's default branch and stop on fetch failure.
-  Branch from the freshly updated remote-tracking ref. Use an explicit
-  `git worktree add` destination if tools cannot honor the path. Integrate and
-  verify required prerequisite commits before assigning dependent work; ticket
-  closure alone does not put code on a branch. Stop on conflicts and report them.
+Retain this coordinator's approval gates, ticket readiness, and acceptance rules.
+Loading either skill does not authorize implementation or dispatch.
 
 ## 1. Establish context
 
@@ -225,12 +155,8 @@ with verified completed blockers. When dispatch is not authorized or supported,
 report the blocker and agree a safe manual execution path that keeps the parent
 anchored rather than inventing agent capabilities.
 
-- Use one writer at a time in a shared task worktree. Parallel file-changing
-  tickets require separate isolated ticket worktrees, even for different files;
-  parallelize only independent work using supported, worktree-scoped native
-  children for same-repository tickets. Worktree isolation does not authorize
-  top-level sessions. Integrate returned commits serially into the anchored
-  task branch and rerun relevant combined checks before unblocking dependents.
+- Apply `agent-dispatch`'s writer-isolation and integration rules to ticket
+  execution; parallelize only independent tickets with verified prerequisites.
 - Supply each writer with the ticket body/comments, approved decisions, exact
   worktree and branch, prerequisite commits, scope, and acceptance checks.
   Require commits, actual validation results, and unresolved blockers in return.
